@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.1.0-dev
+Version 0.1.0
 
 autoheaders automatically generates header files from C source code.
 
@@ -45,7 +45,7 @@ To install the dependencies locally, run without ``sudo`` and add the
 Usage
 -----
 
-If you installed autoheaders, you can simply run ``autoheaders``.
+If you installed autoheaders, you can simply run ``autoheaders``. [3]_
 Otherwise, run ``./autoheaders.py``. This will display usage information
 similar to the following::
 
@@ -64,7 +64,7 @@ similar to the following::
   Generate a private header file containing static declarations.
 * ``-c <cpp-arg>``:
   Pass arguments to the C preprocessor. Separate arguments with commas, or
-  provide multiple ``-c`` options. Use ``\`` to escape characters. [3]_
+  provide multiple ``-c`` options. Use ``\`` to escape characters. [4]_
 * ``--debug``:
   Run the program in debug mode. Exception tracebacks are shown.
 
@@ -111,7 +111,7 @@ blocks or preprocessor conditionals.
 
 Files that are included (with ``#include``) by the C file do not need to exist
 and are not processed by autoheaders, *except* for files inside
-``#ifdef HEADER`` blocks. [4]_
+``#ifdef HEADER`` blocks. [5]_
 
 Sometimes, however, certain ``#include`` statements do need to be processed for
 autoheaders to parse the file properly, especially if the included files define
@@ -126,7 +126,7 @@ after the ``#include <...>``, *on the same line*. For example:
 
 will cause autoheaders to include ``assert.h`` during its processing, but
 ``stdio.h`` will not be included (unless these ``#include`` statements appear
-in an ``#ifdef HEADER`` block [4]_).
+in an ``#ifdef HEADER`` block [5]_).
 
 
 Private headers
@@ -307,7 +307,7 @@ Dependencies
   installing these):
 
   - `pycparser`_ ≥ 2.18
-  - `setuptools`_ [5]_ ≥ 39.0.0
+  - `setuptools`_ [6]_ ≥ 39.0.0
 
 .. _Python: https://www.python.org/
 .. _GCC: https://gcc.gnu.org/
@@ -319,7 +319,7 @@ License
 -------
 
 autoheaders is licensed under the GNU General Public License, version 3 or any
-later version. See `LICENSE`_. [6]_
+later version. See `LICENSE`_. [7]_
 
 This README file has been released to the public domain using `CC0`_.
 
@@ -333,19 +333,22 @@ This README file has been released to the public domain using `CC0`_.
 .. [2] If using ``setup.py``, add the ``--user`` option after ``install``
    (rather than before it).
 
-.. [3] Backslashes can be used to include commas in the passed arguments: for
+.. [3] If Python package binary directories are not in your ``$PATH``, you may
+   have to run ``python3 -m autoheaders`` instead.
+
+.. [4] Backslashes can be used to include commas in the passed arguments: for
    example, ``-c 'arg\,with\,commas'`` will pass the single argument
    ``arg,with,commas`` to the preprocessor. Other backslash escapes are simply
    interpreted as the second character: ``-c 'a\bc\\d'`` becomes ``abc\d``.
 
-.. [4] Including ``#ifdef PRIVATE_HEADER`` and ``#ifdef ANY_HEADER`` blocks.
+.. [5] Including ``#ifdef PRIVATE_HEADER`` and ``#ifdef ANY_HEADER`` blocks.
 
-.. [5] Specifically, ``pkg_resources`` must be installed. Some package managers
+.. [6] Specifically, ``pkg_resources`` must be installed. Some package managers
    distribute ``pkg_resources`` separately from ``setuptools``. For example,
    in Debian GNU/Linux and many derivatives, ``pkg_resources`` is available
    via ``apt`` in ``python3-pkg-resources``.
 
-.. [6] This does not apply to generated header files; the copyright and license
+.. [7] This does not apply to generated header files; the copyright and license
    status of such files is unaffected by autoheaders.
 
 .. _pip: https://pip.pypa.io

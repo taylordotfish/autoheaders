@@ -17,10 +17,10 @@
 
 from . import blockrepl, cfile, errors, generator, parser
 from .autoheaders import __version__, generate_header
-from .__main__ import main
+from .main import main, main_with_argv
 
 # Silence Pyflakes
 if False:
     assert [blockrepl, cfile, errors, generator, parser]
     assert [__version__, generate_header]
-    assert [main]
+    assert [main, main_with_argv]
