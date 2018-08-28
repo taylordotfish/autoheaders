@@ -52,13 +52,13 @@ similar to the following::
     autoheaders [options] [--] <c-file>
     autoheaders -h | --help | --version
 
-*Arguments:*
+**Arguments:**
 
 * ``<c-file>``:
   The C source code file from which to generate the header. If ``-`` is passed,
   standard input is read (unless the argument is preceded by ``--``).
 
-*Options:*
+**Options:**
 
 * ``-p --private``:
   Generate a private header file containing static declarations.
