@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with autoheaders.  If not, see <http://www.gnu.org/licenses/>.
 
-from autoheaders.__main__ import main
+from autoheaders.main import main
 
 if __name__ == "__main__":
     main()

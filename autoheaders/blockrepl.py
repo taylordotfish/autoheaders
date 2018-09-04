@@ -106,8 +106,9 @@ def replace_strings(text: bytes) -> bytes:
     parts = []
     pos = 0
     for start, end in get_strings(text):
-        parts.append(text[pos:start])
+        parts.append(text[pos:start+1])
         parts.append(b"\n" * text.count(b"\n", start, end))
+        parts.append(text[end-1:end])
         pos = end
     parts.append(text[pos:])
     return b"".join(parts)

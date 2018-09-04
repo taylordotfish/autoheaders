@@ -28,7 +28,7 @@ import shlex
 import subprocess
 import sys
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 SHIM_NAME = "shim.h"
 

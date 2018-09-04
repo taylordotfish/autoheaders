@@ -54,11 +54,11 @@ class SimpleCParser(Parser):
 
     re_rest_of_string = re.compile(rb"""
         (\\. | [^\\"])* ["]
-    """, re.VERBOSE)
+    """, re.VERBOSE | re.DOTALL)
 
     re_rest_of_char = re.compile(rb"""
         (\\. | [^\\'])* [']
-    """, re.VERBOSE)
+    """, re.VERBOSE | re.DOTALL)
 
     re_source_line = re.compile(rb"""
         ^ [^\S\n]* \S+ .* $
