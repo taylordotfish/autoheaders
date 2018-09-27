@@ -64,7 +64,7 @@ class Parser:
         self.linemap = build_line_map(text)
 
     def line_to_pos(self, lineno):
-        return self.linemap[lineno - 1]
+        return self.linemap[max(lineno, 1) - 1]
 
     def pos_to_line(self, pos):
         lineno = bisect_right(self.linemap, pos)

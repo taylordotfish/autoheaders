@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.1.1
+Version 0.2.0
 
 autoheaders automatically generates header files from C source code.
 
@@ -102,7 +102,8 @@ file.
 Additionally, you can explicitly specify code to be added to the header—this is
 necessary if you define structs or need certain files to be to be included in
 the header. All code between ``#ifdef HEADER`` and ``#endif`` is copied to the
-header file before any function or variable declarations.
+header file, intermixed with the generated declarations (depending on where the
+``#ifdef HEADER`` blocks occur in the source file).
 
 Include guards can also be generated. If a comment of the form
 ``@guard <name>`` is present, an include guard will be generated using the
@@ -219,7 +220,7 @@ private header file. ``test.priv.h`` will then contain the following code:
     // Adds two integers.
     static int32_t add(int32_t first, int32_t second);
 
-See the `example/`_ for a more complete example.
+See the `example/`_ directory for a more complete example.
 
 .. _example/: example/
 
@@ -313,6 +314,16 @@ Dependencies
 .. _GCC: https://gcc.gnu.org/
 .. _Usage: #usage
 .. _pycparser: https://pypi.python.org/pypi/pycparser/
+
+
+What’s new
+----------
+
+Version 0.2.0:
+
+* The order of ``#ifdef HEADER`` blocks and definitions is now preserved.
+  If an ``#ifdef HEADER`` block appears after a function definition, it will
+  now appear after the generated declaration in the header file.
 
 
 License

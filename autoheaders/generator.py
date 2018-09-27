@@ -85,6 +85,9 @@ class HeaderGenerator(c_ast.NodeVisitor):
         self._preproc_filename = None
         self._ast = None
 
+        # Line number of the most recent declaration that was processed.
+        self.last_decl_lineno = 1
+
     def write_raw(self, text):
         self.outfile.write(text.replace(b"\r\n", b"\n"))
 
@@ -93,6 +96,18 @@ class HeaderGenerator(c_ast.NodeVisitor):
             self.outfile.write(b"\n")
         self._first = False
         self.write_raw(text)
+
+    def write_decl_chunk(self, text, lineno):
+        # Write marked chunks.
+        chunks = self.cfile.get_header_chunks(self.last_decl_lineno, lineno)
+        for chunk in chunks:
+            self.write_chunk(chunk)
+        # Write decl chunk.
+        self.write_chunk(text)
+
+    def write_remaining_marked_chunks(self):
+        for chunk in self.cfile.get_header_chunks(self.last_decl_lineno, None):
+            self.write_chunk(chunk)
 
     def visit(self, node):
         if not self._preproc_filename:
@@ -131,12 +146,16 @@ class HeaderGenerator(c_ast.NodeVisitor):
             return
 
         lineno = self._decl.coord.line
-        if not self.cfile.is_in_preproc_cond(lineno):
-            self.write_chunk(
-                self.cfile.make_plain_var_decl(lineno)
-                if self.private else
-                self.cfile.make_extern_var_decl(lineno)
-            )
+        if self.cfile.is_in_preproc_cond(lineno):
+            return
+
+        self.write_decl_chunk(
+            self.cfile.make_plain_var_decl(lineno)
+            if self.private else
+            self.cfile.make_extern_var_decl(lineno),
+            lineno
+        )
+        self.last_decl_lineno = lineno
 
     def visit_FuncDecl(self, node):
         if not self._in_func_def:
@@ -146,9 +165,13 @@ class HeaderGenerator(c_ast.NodeVisitor):
         is_static = "static" in self._decl.storage
         if is_static != self.private:
             return
+
         lineno = self._decl.coord.line
-        if not self.cfile.is_in_preproc_cond(lineno):
-            self.write_chunk(self.cfile.make_func_decl(lineno))
+        if self.cfile.is_in_preproc_cond(lineno):
+            return
+
+        self.write_decl_chunk(self.cfile.make_func_decl(lineno), lineno)
+        self.last_decl_lineno = lineno
 
     def visit_FuncDef(self, node):
         self._in_func_def = True
@@ -162,10 +185,6 @@ class HeaderGenerator(c_ast.NodeVisitor):
 
     def write_from_ast(self):
         self.visit(self._ast)
-
-    def write_marked_chunks(self):
-        for chunk in self.cfile.get_header_chunks():
-            self.write_chunk(chunk)
 
     def write_guard_start(self, guard_name=None):
         if self.private:
@@ -190,7 +209,7 @@ class HeaderGenerator(c_ast.NodeVisitor):
         """
         self.load_ast_from_preprocessed(preprocessed)
         guard = self.write_guard_start()
-        self.write_marked_chunks()
         self.write_from_ast()
+        self.write_remaining_marked_chunks()
         if guard:
             self.write_guard_end()
