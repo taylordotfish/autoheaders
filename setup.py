@@ -64,7 +64,7 @@ def long_description():
 
 setup(
     name="autoheaders",
-    version="0.2.0",
+    version="0.2.1",
     description="Automatically generate headers from C source code.",
     long_description=long_description(),
     url=REPO_URL,

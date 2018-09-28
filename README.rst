@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.2.0
+Version 0.2.1
 
 autoheaders automatically generates header files from C source code.
 
@@ -62,9 +62,14 @@ similar to the following::
 
 * ``-p --private``:
   Generate a private header file containing static declarations.
+
 * ``-c <cpp-arg>``:
   Pass arguments to the C preprocessor. Separate arguments with commas, or
   provide multiple ``-c`` options. Use ``\`` to escape characters. [4]_
+  *Note that when the preprocessor is run, the current working directory is the
+  parent directory of the C file.* It is therefore recommended to convert paths
+  in ``-c`` arguments to absolute paths.
+
 * ``--debug``:
   Run the program in debug mode. Exception tracebacks are shown.
 
@@ -318,6 +323,11 @@ Dependencies
 
 What’s new
 ----------
+
+Version 0.2.1:
+
+* Clarified how the current working directory changes when the preprocessor is
+  run.
 
 Version 0.2.0:
 

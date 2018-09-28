@@ -34,9 +34,13 @@ Arguments:
 
 Options:
   -p --private  Generate a private header file containing static declarations.
+
   -c <cpp-arg>  Pass arguments to the C preprocessor. Separate arguments with
                 commas, or provide multiple "-c" options. Use "\\" to escape
-                characters (e.g., -c 'option\\,with\\,commas').
+                characters (e.g., -c 'option\\,with\\,commas'). NB: When the
+                preprocessor runs, the current working directory is the
+                parent directory of the C file.
+
   --debug       Run the program in debug mode. Exception tracebacks are shown.
 """.rstrip()
 
