@@ -19,6 +19,7 @@ from .cfile import CSourceFile
 from .errors import BaseParseError
 
 from pycparser import c_parser, c_ast, plyparser
+from typing import BinaryIO
 import codecs
 import locale
 import re
@@ -70,14 +71,14 @@ class HeaderGenerator(c_ast.NodeVisitor):
     """Generates a header file from C code.
 
     :param c_text: The (non-preprocessed) C code.
-    :param outfile: An open file object to which to write the generated header.
-    :param private: Whether or not a private header file should be generated.
+    :param preprocessed: The preprocessed C code.
     """
-    def __init__(self, c_text: bytes, outfile, private: bool = False):
+    def __init__(self, c_text: bytes, preprocessed: bytes):
         super().__init__()
-        self.outfile = outfile
-        self.private = private
-        self.cfile = CSourceFile(c_text, private=private)
+        self._outfile = None
+        self._private = None
+        self.cfile = CSourceFile(c_text)
+        self.preprocessed = preprocessed
 
         self._decl = None
         self._first = True
@@ -86,7 +87,28 @@ class HeaderGenerator(c_ast.NodeVisitor):
         self._ast = None
 
         # Line number of the most recent declaration that was processed.
+        self.last_decl_lineno: int = None
+        self.load_ast()
+
+    @property
+    def private(self):
+        return self._private
+
+    @private.setter
+    def private(self, private: bool):
+        self._private = private
+        self.cfile.private = private
+
+    @property
+    def outfile(self):
+        return self._outfile
+
+    @outfile.setter
+    def outfile(self, outfile: BinaryIO):
+        self._outfile = outfile
+        # We're generating a new header, so reset state.
         self.last_decl_lineno = 1
+        self._first = True
 
     def write_raw(self, text):
         self.outfile.write(text.replace(b"\r\n", b"\n"))
@@ -178,8 +200,8 @@ class HeaderGenerator(c_ast.NodeVisitor):
         self.visit(node.decl)
         self._in_func_def = False
 
-    def load_ast_from_preprocessed(self, preprocessed):
-        preproc_str = preprocessed.decode(get_default_encoding())
+    def load_ast(self):
+        preproc_str = self.preprocessed.decode(get_default_encoding())
         self._ast = get_ast(preproc_str)
         self._preproc_filename = get_preproc_filename(preproc_str)
 
@@ -202,12 +224,13 @@ class HeaderGenerator(c_ast.NodeVisitor):
             return
         self.write_raw(b"\n#endif\n")
 
-    def write_all(self, preprocessed: bytes):
+    def write_all(self, outfile: BinaryIO, private: bool = False):
         """Writes a complete header file.
 
-        :param preprocessed: The preprocessed C code.
+        :param outfile: The open binary file to which to write the output.
+        :param private: Whether or not to generate a private header.
         """
-        self.load_ast_from_preprocessed(preprocessed)
+        self.outfile, self.private = outfile, private
         guard = self.write_guard_start()
         self.write_from_ast()
         self.write_remaining_marked_chunks()

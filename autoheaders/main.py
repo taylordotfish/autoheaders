@@ -15,10 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with autoheaders.  If not, see <http://www.gnu.org/licenses/>.
 
-from .autoheaders import __version__, generate_header
+from .autoheaders import __version__, generate_headers, AutoheadersOpts
 from .errors import AutoheadersError
 from collections import namedtuple
-from typing import List
 import os.path
 import re
 import sys
@@ -34,6 +33,11 @@ Arguments:
 
 Options:
   -p --private  Generate a private header file containing static declarations.
+
+  -o <file>     Write the header file to the specified file. If given after
+                "-p", a private header is written. This option may be given
+                twice: once before "-p", and once after. If not given, the
+                header is written to standard output.
 
   -c <cpp-arg>  Pass arguments to the C preprocessor. Separate arguments with
                 commas, or provide multiple "-c" options. Use "\\" to escape
@@ -66,27 +70,31 @@ def usage(bin_name, exit_code: int = 1):
         sys.exit(exit_code)
 
 
-def run(c_file, cpp_args: List[str], private: bool = False):
+def run(args: "ParsedArgs"):
     """Runs the program.
 
-    :param cpp_args: Additional arguments passed to the C preprocessor.
-    :param private: Whether or not a private header is to be generated.
+    :param args: The arguments for the program.
     """
-    generate_header(
-        c_file, sys.stdout.buffer, cpp_args=cpp_args, private=private,
-    )
+    opts = AutoheadersOpts()
+    opts.c_path = args.c_file
+    opts.outpath = args.outfile
+    opts.private_outpath = args.private_outfile
+    opts.cpp_args = args.cpp_args
+    opts.private = args.private
+    generate_headers(opts)
 
 
-def run_or_exit(*args, debug: bool = False, **kwargs):
+def run_or_exit(args: "ParsedArgs", debug: bool = False):
     """Runs the program. If an error is encountered, it is printed
     and the program exits. Arguments are passed to :func:`run`.
 
+    :param args: The arguments for the program.
     :param debug: Whether or not to run the program in debug mode.
     If true, full exception tracebacks will be shown when errors are
     encountered.
     """
     try:
-        run(*args, **kwargs)
+        run(args)
     except AutoheadersError as e:
         if debug:
             raise
@@ -119,6 +127,9 @@ class ParsedArgs:
         # If None, code is read from stdin.
         self.c_file = None
         self.cpp_args = []
+
+        self.outfile = None
+        self.private_outfile = None
 
         self.no_args = False
         self.parse_error = None
@@ -164,6 +175,7 @@ class ArgParser:
             return
         if body == "version":
             self.parsed.version = True
+            self.end_early = True
             return
         if body == "help":
             self.parsed.help = True
@@ -178,6 +190,7 @@ class ArgParser:
         self.advance()
         return self.arg
 
+    # Parses a "-c" option.
     def parse_cpp_arg(self, cpp_arg):
         if cpp_arg is None:
             self.error('Expected argument after "-c".')
@@ -189,18 +202,31 @@ class ArgParser:
             re.finditer(r"(?: ^|,) ((?: \\. | [^,])*)", cpp_arg, re.VERBOSE)
         ]
 
+    # Parses a "-o" option.
+    def parse_outfile(self, outfile):
+        if not outfile:
+            self.error('Expected argument after "-o".')
+            return
+        if self.parsed.private:
+            self.parsed.private_outfile = outfile
+            return
+        self.parsed.outfile = outfile
+
     def parse_short_option_char(self, opt_body, index):
         char = opt_body[index]
         if char == "p":
             self.parsed.private = True
             return index + 1
-        if char == "c":
-            self.parse_cpp_arg(self.get_short_opt_arg(opt_body, index))
-            return len(opt_body)
         if char == "h":
             self.parsed.help = True
             self.end_early = True
             return index + 1
+        if char == "c":
+            self.parse_cpp_arg(self.get_short_opt_arg(opt_body, index))
+            return len(opt_body)
+        if char == "o":
+            self.parse_outfile(self.get_short_opt_arg(opt_body, index))
+            return len(opt_body)
         self.error("Unrecognized option: -{}".format(char))
         return index
 
@@ -238,13 +264,16 @@ class ArgParser:
         self.positional_index += 1
 
     def handle_end(self):
+        parsed = self.parsed
         if self.end_early:
             return
-        if self.positional_index >= 1:
+        if self.index <= 0:
+            parsed.no_args = True
             return
-        if self.index > 0:
+        if self.positional_index < 1:
             self.error("Missing required positional argument: <c-file>")
-        self.parsed.no_args = True
+        if parsed.private and parsed.outfile and not parsed.private_outfile:
+            stderr('Warning: "-p" has no effect on earlier "-o" option.')
 
     def parse(self):
         while not self.done:
@@ -268,11 +297,7 @@ def main_with_argv(argv):
     if parsed.version:
         print(__version__)
         return
-
-    run_or_exit(
-        c_file=parsed.c_file, cpp_args=parsed.cpp_args,
-        private=parsed.private, debug=parsed.debug,
-    )
+    run_or_exit(parsed, debug=parsed.debug)
 
 
 def main():

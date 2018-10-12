@@ -16,11 +16,11 @@
 # along with autoheaders.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import blockrepl, cfile, errors, generator, parser
-from .autoheaders import __version__, generate_header
+from .autoheaders import __version__, generate_headers
 from .main import main, main_with_argv
 
 # Silence Pyflakes
 if False:
     assert [blockrepl, cfile, errors, generator, parser]
-    assert [__version__, generate_header]
+    assert [__version__, generate_headers]
     assert [main, main_with_argv]

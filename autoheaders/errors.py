@@ -35,3 +35,9 @@ class AutoheadersFileNotFoundError(AutoheadersError):
     @classmethod
     def from_filename(cls, filename):
         return cls("File not found: {}".format(filename))
+
+
+class AutoheadersFileWriteError(AutoheadersError):
+    @classmethod
+    def from_filename(cls, filename):
+        return cls("Could not write to file: {}".format(filename))

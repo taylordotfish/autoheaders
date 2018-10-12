@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.2.1
+Version 0.3.0
 
 autoheaders automatically generates header files from C source code.
 
@@ -62,6 +62,11 @@ similar to the following::
 
 * ``-p --private``:
   Generate a private header file containing static declarations.
+
+* ``-o <file>``
+  Write the header file to the specified file. If given after ``-p``, a private
+  header is written. This option may be given twice: once before ``-p``, and
+  once after. If not given, the header is written to standard output.
 
 * ``-c <cpp-arg>``:
   Pass arguments to the C preprocessor. Separate arguments with commas, or
@@ -143,8 +148,7 @@ private header files can be generated as well. These header files are designed
 to be included only by the corresponding C file and remove the need for
 forward declarations of static functions.
 
-To generate a private header file, provide the option ``-p`` before the
-path to the C file.
+To generate a private header file, provide the option ``-p``.
 
 ``#ifdef HEADER`` blocks will not be included in the private header. To include
 code in the private header (for things like private structures), use
@@ -195,7 +199,7 @@ If the following code is in ``test.c``:
         return first + second;
     }
 
-then you can run ``autoheaders test.c > test.h`` to generate the public header
+then you can run ``autoheaders test.c -o test.h`` to generate the public header
 file. ``test.h`` will then contain the following code:
 
 .. code:: c
@@ -217,13 +221,18 @@ file. ``test.h`` will then contain the following code:
 
     #endif
 
-Similarly, you can run ``autoheaders -p test.c > test.priv.h`` to generate the
+Similarly, you can run ``autoheaders test.c -p -o test.priv.h`` to generate the
 private header file. ``test.priv.h`` will then contain the following code:
 
 .. code:: c
 
     // Adds two integers.
     static int32_t add(int32_t first, int32_t second);
+
+You can also generate both the public and private headers at the same time,
+which is faster than generating each individually, by running::
+
+    autoheaders test.c -o test.h -p -o test.priv.h
 
 See the `example/`_ directory for a more complete example.
 
@@ -265,12 +274,12 @@ the fake header would be stored in ``fake/pthread/pthread.h``.
 
 After creating your fake headers, you can run autoheaders as follows::
 
-    autoheaders <c-file> -c -I,<fake-header-dir>
+    autoheaders <c-file> -c -I<fake-header-dir>
 
 where ``<fake-header-dir>`` is the directory containing the fake headers.
 Following the examples above, autoheaders might be invoked as::
 
-    autoheaders file.c -c -I,fake/
+    autoheaders file.c -c -Ifake/
 
 Additionally, you can include your fake header directory automatically by
 giving it a special name. When running, autoheaders will look for a directory
@@ -323,6 +332,10 @@ Dependencies
 
 What’s new
 ----------
+
+Version 0.3.0:
+
+* Public and private headers can now be generated at the same time.
 
 Version 0.2.1:
 

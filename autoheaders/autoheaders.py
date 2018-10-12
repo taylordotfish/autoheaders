@@ -16,6 +16,7 @@
 # along with autoheaders.  If not, see <http://www.gnu.org/licenses/>.
 
 from .errors import AutoheadersError, AutoheadersFileNotFoundError
+from .errors import AutoheadersFileWriteError
 from .generator import HeaderGenerator
 from .blockrepl import replace_blocks
 from .precpp import process_pre_cpp_text
@@ -28,7 +29,7 @@ import shlex
 import subprocess
 import sys
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 SHIM_NAME = "shim.h"
 
@@ -190,18 +191,56 @@ def _read_file(c_path):
         raise AutoheadersFileNotFoundError.from_filename(c_path) from e
 
 
-def generate_header(
-        c_path: str, outfile, cpp_args: List[str] = None,
-        private: bool = False):
-    """Generates a header file from a C source code file.
+class AutoheadersOpts:
+    """Options for an invocation of autoheaders.
 
-    :param c_path: The path to the C file. If this is ``None``, standard
-      input will be read.
-    :param outfile: An open file object to which to write the header file.
-    :param cpp_args: Additional args passed to the C preprocessor.
-    :param private: Whether or not a private header is to be generated.
+    Separate from command-line options; see `ParsedArgs`.
     """
-    c_text = _read_file(c_path)
-    preprocessed = preprocess(c_path, c_text, cpp_args)
-    gen = HeaderGenerator(c_text, outfile, private=private)
-    gen.write_all(preprocessed)
+    def __init__(self):
+        # Path to the C file.
+        self.c_path: str = None
+
+        # Path to the destination for the regular header.
+        self.outpath: str = None
+
+        # Path to the destination for the private header.
+        self.private_outpath: str = None
+
+        # Additional arguments for the C preprocessor.
+        self.cpp_args: List[str] = None
+
+        # If neither outpath nor private_outpath is provided, this attribute
+        # controls whether or not the header written to stdout is private.
+        self.private: bool = False
+
+
+def make_header_generator(opts: AutoheadersOpts):
+    c_text = _read_file(opts.c_path)
+    preprocessed = preprocess(opts.c_path, c_text, opts.cpp_args)
+    return HeaderGenerator(c_text, preprocessed)
+
+
+def _open_outfile(path: str):
+    try:
+        return open(path, "wb")
+    except (FileNotFoundError, PermissionError) as e:
+        raise AutoheadersFileWriteError.from_filename(path) from e
+
+
+def generate_headers(opts: AutoheadersOpts):
+    """Generates header files from a C source code file.
+
+    :param opts: Options for this invocation of autoheaders.
+    """
+    gen = make_header_generator(opts)
+    if not (opts.outpath or opts.private_outpath):
+        gen.write_all(sys.stdout.buffer, private=opts.private)
+        return
+
+    if opts.outpath:
+        with _open_outfile(opts.outpath) as f:
+            gen.write_all(f, private=False)
+
+    if opts.private_outpath:
+        with _open_outfile(opts.private_outpath) as f:
+            gen.write_all(f, private=True)
