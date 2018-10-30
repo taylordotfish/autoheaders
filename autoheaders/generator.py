@@ -161,7 +161,8 @@ class HeaderGenerator(c_ast.NodeVisitor):
         self.on_var_decl()
 
     def visit_ArrayDecl(self, node):
-        self.on_var_decl()
+        if node.dim is not None:
+            self.on_var_decl()
 
     def on_var_decl(self):
         if "extern" in self._decl.storage:
