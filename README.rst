@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.3.0
+Version 0.3.1
 
 autoheaders automatically generates header files from C source code.
 
@@ -332,6 +332,10 @@ Dependencies
 
 What’s new
 ----------
+
+Version 0.3.1:
+
+* Fixed issue where array declarations would be ignored.
 
 Version 0.3.0:
 
