@@ -1,0 +1,2 @@
+pycparser==2.20
+setuptools==53.0.0

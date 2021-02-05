@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.3.2
+Version 0.3.3-dev
 
 autoheaders automatically generates header files from C source code.
 
@@ -318,11 +318,14 @@ Dependencies
 * `Python`_ ≥ 3.5 with `pip`_ installed
 * A `GCC`_-compatible compiler (specifically, a compatible C preprocessor);
   see the `Usage`_ section.
-* The following Python packages (the installation instructions above handle
-  installing these):
+* The following Python packages:
 
-  - `pycparser`_ ≥ 2.18
-  - `setuptools`_ [6]_ ≥ 39.0.0
+  - `pycparser`_
+  - `setuptools`_ [6]_
+
+The installation instructions above handle installing the Python packages.
+Alternatively, running ``pip3 install -r requirements.freeze.txt`` will install
+specific versions of the dependencies that have been confirmed to work.
 
 .. _Python: https://www.python.org/
 .. _GCC: https://gcc.gnu.org/
