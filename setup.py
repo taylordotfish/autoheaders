@@ -64,7 +64,7 @@ def long_description():
 
 setup(
     name="autoheaders",
-    version="0.3.3-dev",
+    version="0.3.3",
     description="Automatically generate headers from C source code.",
     long_description=long_description(),
     url=REPO_URL,
@@ -79,6 +79,9 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     keywords="c header preprocessor",
     packages=["autoheaders"],

@@ -1,13 +1,22 @@
 autoheaders
 ===========
 
-Version 0.3.3-dev
+Version 0.3.3
 
 autoheaders automatically generates header files from C source code.
 
 
 Installation
 ------------
+
+From PyPI
+~~~~~~~~~
+
+Install with `pip`_::
+
+    sudo pip3 install autoheaders
+
+To install locally, run without ``sudo`` and add the ``--user`` option.
 
 From the Git repository
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -335,6 +344,10 @@ specific versions of the dependencies that have been confirmed to work.
 
 What’s new
 ----------
+
+Version 0.3.3:
+
+* autoheaders can now be installed from PyPI.
 
 Version 0.3.2:
 

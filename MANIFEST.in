@@ -18,3 +18,4 @@
 include LICENSE
 include autoheaders/shim.h
 global-exclude *.pyc
+global-exclude /.*
