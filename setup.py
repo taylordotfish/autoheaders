@@ -64,7 +64,7 @@ def long_description():
 
 setup(
     name="autoheaders",
-    version="0.3.3",
+    version="0.3.4-dev",
     description="Automatically generate headers from C source code.",
     long_description=long_description(),
     url=REPO_URL,
@@ -94,6 +94,7 @@ setup(
         "pycparser>=2.18,<3",
         "setuptools>=39.0.0",
     ],
+    python_requires=">=3.5",
     include_package_data=True,
     package_data={
         "autoheaders": ["autoheaders/shim.h"],
