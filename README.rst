@@ -1,7 +1,7 @@
 autoheaders
 ===========
 
-Version 0.3.4
+Version 0.3.5
 
 autoheaders automatically generates header files from C source code.
 

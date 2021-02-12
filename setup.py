@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2016-2018 taylor.fish <contact@taylor.fish>
+# Copyright (C) 2016-2018, 2021 taylor.fish <contact@taylor.fish>
 #
 # This file is part of autoheaders.
 #
@@ -19,22 +19,24 @@
 import os
 import sys
 
+SETUPTOOLS_IMPORT_ERROR_MSG = """\
+setuptools must be installed. If pip is installed, run:
+    sudo pip3 install setuptools
+Or, to install locally:
+    pip3 install --user setuptools
+If pip isn't installed, see:
+    https://pip.pypa.io/en/stable/installing/
+Make sure the Python 3 version of pip (pip3) is installed.
+""".rstrip()
+
 try:
     from setuptools import setup
 except ModuleNotFoundError:
-    sys.exit("\n".join([
-        "setuptools must be installed. If pip is installed, run:",
-        "    sudo pip3 install setuptools",
-        "Or, to install locally:",
-        "    pip3 install --user setuptools",
-        "If pip isn't installed, see:",
-        "    https://pip.pypa.io/en/stable/installing/",
-        "Make sure the Python 3 version of pip (pip3) is installed.",
-    ]))
+    sys.exit(SETUPTOOLS_IMPORT_ERROR_MSG)
 
-REPO_URL = "https://git.taylor.fish/taylor.fish/autoheaders"
-REPO_FILE_SUFFIX = "src/branch/master"
-REPO_FILE_URL = "/".join([REPO_URL.rstrip("/"), REPO_FILE_SUFFIX.strip("/")])
+REPO_URL = "https://github.com/taylordotfish/autoheaders"
+REPO_FILE_URL = "{}/blob/master".format(REPO_URL)
+REPO_DIR_URL = "{}/tree/master".format(REPO_URL)
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 LICENSE_ID = "GNU General Public License v3 or later (GPLv3+)"
@@ -47,9 +49,17 @@ def repo_file_url_replacement(start, end):
     )
 
 
+def repo_dir_url_replacement(start, end):
+    return (
+        "{}{}".format(start, end),
+        "{}{}/{}".format(start, REPO_DIR_URL, end),
+    )
+
+
 DESC_REPLACEMENTS = dict([
     repo_file_url_replacement(".. _LICENSE: ", "LICENSE"),
     repo_file_url_replacement(".. _shim.h: ", "autoheaders/shim.h"),
+    repo_dir_url_replacement(".. _example/: ", "example/"),
 ])
 
 
@@ -64,7 +74,7 @@ def long_description():
 
 setup(
     name="autoheaders",
-    version="0.3.4",
+    version="0.3.5",
     description="Automatically generate headers from C source code.",
     long_description=long_description(),
     url=REPO_URL,
